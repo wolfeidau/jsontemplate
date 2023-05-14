@@ -2,15 +2,15 @@ package jsontemplate
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"io"
 
 	jsoniterator "github.com/json-iterator/go"
-
 	"github.com/valyala/fasttemplate"
 )
 
+// NewTemplate parses the given template content into a fasttemplate
+// Template and returns it.
 type Template struct {
 	ft *fasttemplate.Template
 }
@@ -24,11 +24,23 @@ func NewTemplate(content string) (*Template, error) {
 	return &Template{ft: ft}, nil
 }
 
-func (t *Template) ExecuteToString(ctx context.Context, evt []byte) (string, error) {
+// ExecuteToString executes the template against the given JSON event
+// and returns the result as a string.
+func (t *Template) ExecuteToString(evt []byte) (string, error) {
+	return t.ft.ExecuteFuncStringWithErr(eventJSONTagFunc(evt))
+}
 
+// Execute executes the template against the given JSON event
+// and writes the result to the given writer. It returns the number of
+// bytes written and any error.
+func (t *Template) Execute(wr io.Writer, evt []byte) (int64, error) {
+	return t.ft.ExecuteFunc(wr, eventJSONTagFunc(evt))
+}
+
+func eventJSONTagFunc(evt []byte) fasttemplate.TagFunc {
 	doc := NewDocument(evt)
 
-	return t.ft.ExecuteFuncStringWithErr(func(w io.Writer, tag string) (int, error) {
+	return func(w io.Writer, tag string) (int, error) {
 		result, err := doc.Read(tag)
 		if err != nil {
 			return 0, fmt.Errorf("failed to read field: %w", err)
@@ -42,5 +54,5 @@ func (t *Template) ExecuteToString(ctx context.Context, evt []byte) (string, err
 		}
 
 		return w.Write(bytes.TrimSuffix(buf.Bytes(), []byte("\n")))
-	})
+	}
 }
