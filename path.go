@@ -85,6 +85,8 @@ func (d *Document) Read(path string) (result any, err error) {
 		// if we are done return iterator string
 		if !p.hasNext() {
 			switch it.ValueType() {
+			case jsoniterator.NilValue:
+				return nil, nil
 			case jsoniterator.BoolValue:
 				return it.ToBool(), nil
 			case jsoniterator.NumberValue:

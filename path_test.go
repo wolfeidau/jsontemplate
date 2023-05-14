@@ -45,6 +45,12 @@ func TestDocument_Read(t *testing.T) {
 			wantResult: true,
 		},
 		{
+			name:       "should extract null field in document",
+			args:       args{path: "data.set"},
+			content:    []byte(`{"data":{"set":null}}`),
+			wantResult: nil,
+		},
+		{
 			name:       "should extract numeric field from array in document",
 			args:       args{path: "data.counts.0"},
 			content:    []byte(`{"data":{"counts":[23]}}`),
