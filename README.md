@@ -34,6 +34,20 @@ func Example() {
 }
 ```
 
+# Performance
+
+Given I expect to run this for large numbers of events I have attempted to keep the code very simple and capitalise on the work done in the underlying libraries.
+
+```
+go test -bench=. -benchmem
+goos: darwin
+goarch: arm64
+pkg: github.com/wolfeidau/jsontemplate
+BenchmarkTemplate_Execute-10    	  527289	      2027 ns/op	    4655 B/op	     129 allocs/op
+PASS
+ok  	github.com/wolfeidau/jsontemplate	1.264s
+```
+
 # License
 
 This project is released under Apache 2.0 license and is copyright [Mark Wolfe](https://www.wolfe.id.au).
