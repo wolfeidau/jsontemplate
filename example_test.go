@@ -6,7 +6,7 @@ import (
 	"github.com/wolfeidau/jsontemplate"
 )
 
-func Example() {
+func ExampleTemplate_ExecuteToString() {
 	template := `{
   "name": ${msg.name},
   "age": ${msg.age},
