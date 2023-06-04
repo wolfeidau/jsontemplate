@@ -7,19 +7,13 @@ This library provides a way to template JSON using paths extracted from another 
 So we have an event come through, we extract a few fields and insert them into another JSON document.
 
 ```go
-import (
-	"context"
-	"fmt"
-
-	"github.com/wolfeidau/jsontemplate"
-)
-
-func ExampleTemplate_ExecuteToString() {
-	template := `{
+var template = `{
   "name": ${msg.name},
   "age": ${msg.age},
   "cyclist": ${msg.cyclist}
 }`
+
+func ExampleTemplate_ExecuteToString() {
 
 	tpl, _ := jsontemplate.NewTemplate(template)
 
@@ -36,16 +30,16 @@ func ExampleTemplate_ExecuteToString() {
 
 # Performance
 
-Given I expect to run this for large numbers of events I have attempted to keep the code very simple and capitalise on the work done in the underlying libraries.
+Given I expect to run this for large numbers of events I have attempted to keep the code very simple and capitalize on the work done in the underlying libraries.
 
 ```
 go test -bench=. -benchmem
 goos: darwin
 goarch: arm64
 pkg: github.com/wolfeidau/jsontemplate
-BenchmarkTemplate_Execute-10    	  527289	      2027 ns/op	    4655 B/op	     129 allocs/op
+BenchmarkTemplate_ExecuteToString-10    	  606963	      2087 ns/op	    4695 B/op	     131 allocs/op
 PASS
-ok  	github.com/wolfeidau/jsontemplate	1.264s
+ok  	github.com/wolfeidau/jsontemplate	1.402s
 ```
 
 # License
