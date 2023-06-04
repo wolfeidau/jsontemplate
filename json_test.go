@@ -36,7 +36,7 @@ func TestTemplate_Execute(t *testing.T) {
 	assert.Equal(expectedDoc, buf.String())
 }
 
-func BenchmarkTemplate_Execute(b *testing.B) {
+func BenchmarkTemplate_ExecuteToString(b *testing.B) {
 
 	content := []byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`)
 	expectedResult := `{"data":"markw",count:23,"flag":true}`
