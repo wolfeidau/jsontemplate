@@ -19,21 +19,78 @@ func TestExecute(t *testing.T) {
 }
 
 func TestTemplate_Execute(t *testing.T) {
-	assert := require.New(t)
 
-	content := `{"greeting":${name}}`
-	tmpl, err := NewTemplate(content)
-	assert.NoError(err)
+	type args struct {
+		evt []byte
+	}
+	tests := []struct {
+		name            string
+		templateStr     string
+		args            args
+		wantResult      string
+		wantTemplateErr bool
+		wantErr         bool
+	}{
+		{
+			name:        "should return number",
+			templateStr: `${data.counts.2}`,
+			args: args{
+				evt: []byte(`{"data": {"counts": [1,2,12]}}`),
+			},
+			wantResult: `12`,
+		},
+		{
+			name:        "should return array",
+			templateStr: `{"names": ${data.names}}`,
+			args: args{
+				evt: []byte(`{"data": {"names": ["a", "b", "c"]}}`),
+			},
+			wantResult: `{"names": ["a", "b", "c"]}`,
+		},
+		{
+			name:        "should return error for invalid payload",
+			templateStr: `${data.counts.2}`,
+			args: args{
+				evt: []byte(`{"data": {"counts"": [1,2,12]}}`),
+			},
+			wantErr: true,
+		},
+		{
+			name:        "should return error for invalid template",
+			templateStr: `${`,
+			args: args{
+				evt: []byte(`{"data": {"counts": [1,2,12]}}`),
+			},
+			wantTemplateErr: true,
+		},
+	}
 
-	evt := []byte(`{"name": "John"}`)
-	buf := new(bytes.Buffer)
-	n, err := tmpl.Execute(buf, evt)
-	assert.NoError(err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert := require.New(t)
 
-	expectedDoc := `{"greeting":"John"}`
+			tpl, err := NewTemplate(tt.templateStr)
+			if tt.wantTemplateErr {
+				assert.Error(err)
+				return
+			}
 
-	assert.Equal(int64(len(expectedDoc)), n)
-	assert.Equal(expectedDoc, buf.String())
+			assert.NoError(err)
+
+			buf := new(bytes.Buffer)
+
+			n, err := tpl.Execute(buf, tt.args.evt)
+			if tt.wantErr {
+				assert.Error(err)
+				return
+			}
+
+			assert.NoError(err)
+			assert.True(n > 0, "expected bytes written > 0")
+			assert.JSONEq(tt.wantResult, buf.String())
+		})
+	}
+
 }
 
 func BenchmarkTemplate_ExecuteToString(b *testing.B) {

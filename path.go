@@ -84,16 +84,7 @@ func (d *Document) Read(path string) (result any, err error) {
 
 		// if we are done return iterator string
 		if !p.hasNext() {
-			switch it.ValueType() {
-			case jsoniterator.NilValue:
-				return nil, nil
-			case jsoniterator.BoolValue:
-				return it.ToBool(), nil
-			case jsoniterator.NumberValue:
-				return it.ToInt(), nil
-			default:
-				return it.ToString(), nil
-			}
+			return it.GetInterface(), nil
 		}
 	}
 }

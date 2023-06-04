@@ -1,6 +1,10 @@
 package jsontemplate
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestDocument_Read(t *testing.T) {
 
@@ -36,7 +40,7 @@ func TestDocument_Read(t *testing.T) {
 			name:       "should extract numeric field in document",
 			args:       args{path: "data.count"},
 			content:    []byte(`{"data":{"count":23}}`),
-			wantResult: 23,
+			wantResult: float64(23),
 		},
 		{
 			name:       "should extract boolean field in document",
@@ -54,26 +58,45 @@ func TestDocument_Read(t *testing.T) {
 			name:       "should extract numeric field from array in document",
 			args:       args{path: "data.counts.0"},
 			content:    []byte(`{"data":{"counts":[23]}}`),
-			wantResult: 23,
+			wantResult: float64(23),
 		},
 		{
 			name:       "should extract object field from document",
 			args:       args{path: "data"},
 			content:    []byte(`{"data":{"counts":[23]}}`),
-			wantResult: `{"counts":[23]}`,
+			wantResult: map[string]interface{}(map[string]interface{}{"counts": []interface{}{float64(23)}}),
+		},
+		{
+			name:       "should extract string field from array in document",
+			args:       args{path: "data.counts.0"},
+			content:    []byte(`{"data":{"counts":[23]}}`),
+			wantResult: float64(23),
+		},
+		{
+			name:       "should extract string field from document",
+			args:       args{path: "data"},
+			content:    []byte(`{"data":{"names":["a","b","c"]}}`),
+			wantResult: map[string]interface{}(map[string]interface{}{"names": []interface{}{"a", "b", "c"}}),
+		},
+		{
+			name:       "should extract string field from document",
+			args:       args{path: "data.names.0"},
+			content:    []byte(`{"data":{"names":["a","b","c"]}}`),
+			wantResult: "a",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			assert := require.New(t)
 			d := NewDocument(tt.content)
 			gotResult, err := d.Read(tt.args.path)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("Document.Read() error = %v, wantErr %v", err, tt.wantErr)
-				return
+			if tt.wantErr {
+				assert.Error(err)
+			} else {
+				assert.NoError(err)
 			}
-			if gotResult != tt.wantResult {
-				t.Errorf("Document.Read() = %v, want %v", gotResult, tt.wantResult)
-			}
+
+			assert.Equal(tt.wantResult, gotResult)
 		})
 	}
 }
