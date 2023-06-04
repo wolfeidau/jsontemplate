@@ -6,12 +6,13 @@ import (
 	"github.com/wolfeidau/jsontemplate"
 )
 
-func ExampleTemplate_ExecuteToString() {
-	template := `{
+var template = `{
   "name": ${msg.name},
   "age": ${msg.age},
   "cyclist": ${msg.cyclist}
 }`
+
+func ExampleTemplate_ExecuteToString() {
 
 	tpl, _ := jsontemplate.NewTemplate(template)
 
