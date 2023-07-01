@@ -116,3 +116,28 @@ func BenchmarkTemplate_ExecuteToString(b *testing.B) {
 		}
 	})
 }
+
+func BenchmarkTemplate_Execute(b *testing.B) {
+
+	content := []byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`)
+	expectedResult := `{"data":"markw",count:23,"flag":true}`
+
+	tpl, err := NewTemplate(`{"data":${msg.name},count:${msg.age},"flag":${msg.cyclist}}`)
+	if err != nil {
+		b.Fatalf("error in template: %s", err)
+	}
+
+	b.ResetTimer()
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			buf := new(bytes.Buffer)
+			_, err := tpl.Execute(buf, content)
+			if err != nil {
+				b.Fatalf("unexpected error: %s", err)
+			}
+			if buf.String() != expectedResult {
+				b.Fatalf("unexpected result\n%q\nExpected\n%q\n", buf.String(), expectedResult)
+			}
+		}
+	})
+}

@@ -7,24 +7,32 @@ This library provides a way to template JSON using paths extracted from another 
 So we have an event come through, we extract a few fields and insert them into another JSON document.
 
 ```go
-var template = `{
-  "name": ${msg.name},
-  "age": ${msg.age},
-  "cyclist": ${msg.cyclist}
-}`
-
 func ExampleTemplate_ExecuteToString() {
 
-	tpl, _ := jsontemplate.NewTemplate(template)
+	tpl, _ := jsontemplate.NewTemplate(`{"name": ${msg.name},"age": ${msg.age},"cyclist": ${msg.cyclist}}`)
 
 	res, _ := tpl.ExecuteToString([]byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`))
 	fmt.Println(res)
 	// Output:
-	// {
-	//   "name": "markw",
-	//   "age": 23,
-	//   "cyclist": true
-	// }
+	// {"name": "markw","age": 23,"cyclist": true}
+}
+```
+
+## tags
+
+To customise how the JSON is rendered, you can use tags which are provided after the path and delimited by `;`:
+
+* `escape`, this will escape the JSON output.
+
+```go
+func ExampleTemplate_ExecuteToString_encoded() {
+
+	tpl, _ := jsontemplate.NewTemplate(`{"msg": ${msg;escape}`)
+
+	res, _ := tpl.ExecuteToString([]byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`))
+	fmt.Println(res)
+	// Output:
+	// {"msg": "{\"name\":\"markw\",\"age\":23,\"cyclist\":true}"
 }
 ```
 
@@ -37,9 +45,10 @@ go test -bench=. -benchmem
 goos: darwin
 goarch: arm64
 pkg: github.com/wolfeidau/jsontemplate
-BenchmarkTemplate_ExecuteToString-10    	  606963	      2087 ns/op	    4695 B/op	     131 allocs/op
+BenchmarkTemplate_ExecuteToString-10    	  559975	      2188 ns/op	    4767 B/op	     134 allocs/op
+BenchmarkTemplate_Execute-10            	  523843	      2282 ns/op	    4876 B/op	     136 allocs/op
 PASS
-ok  	github.com/wolfeidau/jsontemplate	1.402s
+ok  	github.com/wolfeidau/jsontemplate	3.893s
 ```
 
 # License

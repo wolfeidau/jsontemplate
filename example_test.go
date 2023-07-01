@@ -6,22 +6,22 @@ import (
 	"github.com/wolfeidau/jsontemplate"
 )
 
-var template = `{
-  "name": ${msg.name},
-  "age": ${msg.age},
-  "cyclist": ${msg.cyclist}
-}`
-
 func ExampleTemplate_ExecuteToString() {
 
-	tpl, _ := jsontemplate.NewTemplate(template)
+	tpl, _ := jsontemplate.NewTemplate(`{"name": ${msg.name},"age": ${msg.age},"cyclist": ${msg.cyclist}}`)
 
 	res, _ := tpl.ExecuteToString([]byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`))
 	fmt.Println(res)
 	// Output:
-	// {
-	//   "name": "markw",
-	//   "age": 23,
-	//   "cyclist": true
-	// }
+	// {"name": "markw","age": 23,"cyclist": true}
+}
+
+func ExampleTemplate_ExecuteToString_encoded() {
+
+	tpl, _ := jsontemplate.NewTemplate(`{"msg": ${msg;escape}`)
+
+	res, _ := tpl.ExecuteToString([]byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`))
+	fmt.Println(res)
+	// Output:
+	// {"msg": "{\"name\":\"markw\",\"age\":23,\"cyclist\":true}"
 }
