@@ -84,6 +84,18 @@ func TestDocument_Read(t *testing.T) {
 			content:    []byte(`{"data":{"names":["a","b","c"]}}`),
 			wantResult: "a",
 		},
+		{
+			name:       "should extract string field from document",
+			args:       args{path: "data;escape"},
+			content:    []byte(`{"data":{"names":["a","b","c"]}}`),
+			wantResult: `{"names":["a","b","c"]}`,
+		},
+		{
+			name:    "should extract string field from document",
+			args:    args{path: "data;nope"},
+			content: []byte(`{"data":{"names":["a","b","c"]}}`),
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

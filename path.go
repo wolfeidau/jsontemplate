@@ -1,6 +1,7 @@
 package jsontemplate
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -10,27 +11,45 @@ import (
 
 type path struct {
 	tokens []any
+	escape bool
 }
 
 // Parse takes a string path and returns a Path struct
 // with the path tokens split on
-func parse(t string) *path {
+func parse(t string) (*path, error) {
 
-	strs := strings.Split(t, ".")
+	p := &path{}
 
-	tokens := make([]any, len(strs))
+	tags := strings.Split(t, ";")
 
-	for i := range tokens {
-		v := strs[i]
-
-		if intval, err := strconv.ParseInt(v, 10, 64); err == nil {
-			tokens[i] = int(intval)
-		} else {
-			tokens[i] = v
+	for _, opt := range tags[1:] {
+		switch opt {
+		case "escape":
+			p.escape = true
+		default:
+			return nil, fmt.Errorf("unable to parse path, unknown tag: %s", opt)
 		}
 	}
 
-	return &path{tokens: tokens}
+	strs := strings.Split(tags[0], ".")
+
+	if strs[0] == "" {
+		return nil, errors.New("path cannot start with `.`")
+	}
+
+	p.tokens = make([]any, len(strs))
+
+	for i := range p.tokens {
+		v := strs[i]
+
+		if intval, err := strconv.ParseInt(v, 10, 64); err == nil {
+			p.tokens[i] = int(intval)
+		} else {
+			p.tokens[i] = v
+		}
+	}
+
+	return p, nil
 }
 
 // Next returns the next path token and updates the Path tokens.
@@ -62,7 +81,11 @@ func NewDocument(data []byte) *Document {
 // value at the path.
 func (d *Document) Read(path string) (result any, err error) {
 
-	p := parse(path)
+	p, err := parse(path)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing path: %w", err)
+	}
+
 	it := jsoniterator.Get(d.content)
 
 	for {
@@ -84,6 +107,9 @@ func (d *Document) Read(path string) (result any, err error) {
 
 		// if we are done return iterator string
 		if !p.hasNext() {
+			if p.escape {
+				return it.ToString(), nil
+			}
 			return it.GetInterface(), nil
 		}
 	}
