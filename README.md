@@ -1,6 +1,15 @@
 # jsontemplate [![Go Report Card](https://goreportcard.com/badge/github.com/wolfeidau/jsontemplate)](https://goreportcard.com/report/github.com/wolfeidau/jsontemplate) [![Documentation](https://godoc.org/github.com/wolfeidau/jsontemplate?status.svg)](https://godoc.org/github.com/wolfeidau/jsontemplate)
 
-This library provides a way to template JSON using paths extracted from another json document. This uses [github.com/json-iterator/go](https://github.com/json-iterator/go) to parse the document with marshalling it, only the fields needed are extracted. In addition to extracting fields from the current document, it will also attempt to parse and extract fields from a nested JSON document if the path requires.
+This library provides a way to template a [JSON](https://www.json.org/) document using paths extracted from another, typically larger, JSON document. This uses [github.com/json-iterator/go](https://github.com/json-iterator/go) to parse the document without marshalling it, only the fields needed are extracted. In addition to extracting fields from the source document, it will also attempt to parse and extract fields from nested JSON document, stored in a string field, if the path requires.
+
+# What can it be used for?
+
+I use this library to reduce large JSON documents into smaller JSON documents that contain only the data needed for a specific purpose.
+
+Examples of this are the following:
+
+* S3 event notifications contain a large JSON payload with details of the event, this can be templated into a smaller JSON payload containing only the data needed by a Lambda function.
+* API Gateway request payloads received by webhooks often contain large JSON payloads, these can be templated into smaller JSON payloads containing only the data needed by a downstream service.
 
 # Example
 
