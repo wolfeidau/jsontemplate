@@ -10,12 +10,12 @@ import (
 func TestExecute(t *testing.T) {
 	assert := require.New(t)
 
-	tpl, err := NewTemplate(`{"data":${msg.name},count:${msg.age},"flag":${msg.cyclist}}`)
+	tpl, err := NewTemplate(`{"data":"${msg.name}","count":"${msg.age}","flag":"${msg.cyclist}"}`)
 	assert.NoError(err)
 
 	res, err := tpl.ExecuteToString([]byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`))
 	assert.NoError(err)
-	assert.Equal(`{"data":"markw",count:23,"flag":true}`, res)
+	assert.Equal(`{"data":"markw","count":23,"flag":true}`, res)
 }
 
 func TestTemplate_Execute(t *testing.T) {
@@ -33,7 +33,7 @@ func TestTemplate_Execute(t *testing.T) {
 	}{
 		{
 			name:        "should return number",
-			templateStr: `${data.counts.2}`,
+			templateStr: `"${data.counts.2}"`,
 			args: args{
 				evt: []byte(`{"data": {"counts": [1,2,12]}}`),
 			},
@@ -41,7 +41,7 @@ func TestTemplate_Execute(t *testing.T) {
 		},
 		{
 			name:        "should return array",
-			templateStr: `{"names": ${data.names}}`,
+			templateStr: `{"names": "${data.names}"}`,
 			args: args{
 				evt: []byte(`{"data": {"names": ["a", "b", "c"]}}`),
 			},
@@ -49,7 +49,7 @@ func TestTemplate_Execute(t *testing.T) {
 		},
 		{
 			name:        "should return error for invalid payload",
-			templateStr: `${data.counts.2}`,
+			templateStr: `"${data.counts.2}"`,
 			args: args{
 				evt: []byte(`{"data": {"counts"": [1,2,12]}}`),
 			},
@@ -96,9 +96,9 @@ func TestTemplate_Execute(t *testing.T) {
 func BenchmarkTemplate_ExecuteToString(b *testing.B) {
 
 	content := []byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`)
-	expectedResult := `{"data":"markw",count:23,"flag":true}`
+	expectedResult := `{"data":"markw","count":23,"flag":true}`
 
-	tpl, err := NewTemplate(`{"data":${msg.name},count:${msg.age},"flag":${msg.cyclist}}`)
+	tpl, err := NewTemplate(`{"data":"${msg.name}","count":"${msg.age}","flag":"${msg.cyclist}"}`)
 	if err != nil {
 		b.Fatalf("error in template: %s", err)
 	}
@@ -120,9 +120,9 @@ func BenchmarkTemplate_ExecuteToString(b *testing.B) {
 func BenchmarkTemplate_Execute(b *testing.B) {
 
 	content := []byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`)
-	expectedResult := `{"data":"markw",count:23,"flag":true}`
+	expectedResult := `{"data":"markw","count":23,"flag":true}`
 
-	tpl, err := NewTemplate(`{"data":${msg.name},count:${msg.age},"flag":${msg.cyclist}}`)
+	tpl, err := NewTemplate(`{"data":"${msg.name}","count":"${msg.age}","flag":"${msg.cyclist}"}`)
 	if err != nil {
 		b.Fatalf("error in template: %s", err)
 	}

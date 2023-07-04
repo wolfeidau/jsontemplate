@@ -18,12 +18,13 @@ So we have an event come through, we extract a few fields and insert them into a
 ```go
 func ExampleTemplate_ExecuteToString() {
 
-	tpl, _ := jsontemplate.NewTemplate(`{"name": ${msg.name},"age": ${msg.age},"cyclist": ${msg.cyclist}}`)
+	tpl, _ := jsontemplate.NewTemplate(`{"name": "${msg.name}","age": "${msg.age}","cyclist": "${msg.cyclist}"}`)
 
 	res, _ := tpl.ExecuteToString([]byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`))
 	fmt.Println(res)
 	// Output:
 	// {"name": "markw","age": 23,"cyclist": true}
+
 }
 ```
 
@@ -36,12 +37,12 @@ To customise how the JSON is rendered, you can use tags which are provided after
 ```go
 func ExampleTemplate_ExecuteToString_encoded() {
 
-	tpl, _ := jsontemplate.NewTemplate(`{"msg": ${msg;escape}`)
+	tpl, _ := jsontemplate.NewTemplate(`{"msg": "${msg;escape}"}`)
 
 	res, _ := tpl.ExecuteToString([]byte(`{"msg":{"name":"markw","age":23,"cyclist":true}}`))
 	fmt.Println(res)
 	// Output:
-	// {"msg": "{\"name\":\"markw\",\"age\":23,\"cyclist\":true}"
+	// {"msg": "{\"name\":\"markw\",\"age\":23,\"cyclist\":true}"}
 }
 ```
 
@@ -54,10 +55,10 @@ go test -bench=. -benchmem
 goos: darwin
 goarch: arm64
 pkg: github.com/wolfeidau/jsontemplate
-BenchmarkTemplate_ExecuteToString-10    	  559975	      2188 ns/op	    4767 B/op	     134 allocs/op
-BenchmarkTemplate_Execute-10            	  523843	      2282 ns/op	    4876 B/op	     136 allocs/op
+BenchmarkTemplate_ExecuteToString-10    	  676122	      2105 ns/op	    4767 B/op	     134 allocs/op
+BenchmarkTemplate_Execute-10            	  559828	      2180 ns/op	    4876 B/op	     136 allocs/op
 PASS
-ok  	github.com/wolfeidau/jsontemplate	3.893s
+ok  	github.com/wolfeidau/jsontemplate	3.001s
 ```
 
 # License

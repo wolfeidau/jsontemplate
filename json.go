@@ -2,11 +2,16 @@ package jsontemplate
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 
 	jsoniterator "github.com/json-iterator/go"
 	"github.com/valyala/fasttemplate"
+)
+
+var (
+	ErrInvalidTemplate = errors.New("invalid JSON format template")
 )
 
 // NewTemplate parses the given template content into a fasttemplate
@@ -16,8 +21,32 @@ type Template struct {
 	encoder Encoder
 }
 
+// NewTemplate parses the given template content into a fasttemplate
+// Template and returns it.
+//
+// Parameters:
+//
+//	content: The template content/string to parse.
+//
+// Returns:
+//
+//	*Template: The parsed Template.
+//	error: Any error encountered parsing the template.
+//
+// Functionality:
+// This function parses the given template string into a fasttemplate
+// Template which can then be executed against JSON events. It validates
+// the template string is valid JSON before parsing and returns an error
+// if invalid.
+//
+// ExecuteToString executes the template against the given JSON event
+// and returns the result as a string.
 func NewTemplate(content string) (*Template, error) {
-	ft, err := fasttemplate.NewTemplate(content, "${", "}")
+	if ok, err := Valid([]byte(content)); !ok {
+		return nil, fmt.Errorf("validation failed: %w", err)
+	}
+
+	ft, err := fasttemplate.NewTemplate(content, `"${`, `}"`)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse template: %w", err)
 	}
@@ -73,4 +102,11 @@ func JSONEncoder(wr io.Writer, v any) error {
 	}
 
 	return nil
+}
+
+func Valid(data []byte) (bool, error) {
+	iter := jsoniterator.ConfigDefault.BorrowIterator(data)
+	defer jsoniterator.ConfigDefault.ReturnIterator(iter)
+	iter.Skip()
+	return iter.Error == nil, iter.Error
 }
